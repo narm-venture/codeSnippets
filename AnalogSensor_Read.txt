@@ -1,0 +1,35 @@
+float ReadSensors()
+{
+	int left,middle,right;
+	float sensor=0.0;
+	left=ReadADC(SENSOR2);
+	middle=ReadADC(SENSOR3);
+	right=ReadADC(SENSOR4);
+	
+	if(left>SENSOR_THRES)
+	{
+		sensor+=0.5*left;
+		LEDOn(2);
+	}
+	else
+	LEDOff(2);
+	if(right>SENSOR_THRES)
+	{
+		sensor-=0.5*right;
+		LEDOn(4);
+	}
+	else
+	LEDOff(4);
+	if(middle>SENSOR_THRES)
+	{
+		sensor-=middle;
+		if(sensor<0)		
+		sensor=0.0;
+		LEDOn(3);
+	}
+	else
+	LEDOff(3);
+	
+	return sensor;
+	
+}

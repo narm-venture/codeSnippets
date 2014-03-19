@@ -1,0 +1,29 @@
+void add_node(int x_cordinate,int y_cordinate,int index)
+{
+	int array[length+2];	
+	for(int i=0;i<length+2;i++)
+	{
+		if(i==index)
+		{
+			array[i]=x_cordinate;
+		}	
+		else if(i==index+1)
+		{
+			array[i]=y_cordinate;
+		}	
+		else
+		{
+			if(i<index)
+			array[i]=PATH_STACK[i];
+			else
+			array[i]=PATH_STACK[i-2];
+		}
+	}
+}
+bool detect_Node()
+{
+	if(ReadADC(SENSOR1)>SENSOR_THRES && ReadADC(SENSOR2)>SENSOR_THRES && ReadADC(SENSOR3)>SENSOR_THRES && ReadADC(SENSOR4)>SENSOR_THRES && ReadADC(SENSOR5)>SENSOR_THRES)
+	return True;
+	else
+	return False;	
+}

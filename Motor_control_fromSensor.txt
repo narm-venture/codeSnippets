@@ -1,0 +1,47 @@
+//Control is 0.0 is line is in center and tends to +ve to 510 for right and tends to -Ve to -510 for left
+
+
+if(control>0.0)
+		{
+			if(control<255)
+			{
+				MotorA(MOTOR_CCW,255);
+				MotorB(MOTOR_CCW,255-control);
+				LEDOn(4);
+				//Needs to turn medium right 
+			}
+			else
+			{
+				MotorA(MOTOR_CW,control-255);
+				MotorB(MOTOR_STOP,0);
+				LEDOn(5);
+				//Need to turn sharp right
+			}
+		}
+		if(control<0.0)
+		{
+			if(control>-255)
+			{
+				MotorB(MOTOR_CCW,255);
+				MotorA(MOTOR_CCW,255+control);
+				LEDOn(2);
+				//Need to turn medium left
+			}
+			else
+			{
+				MotorA(MOTOR_CW,-control-255);
+				MotorB(MOTOR_STOP,0);
+				LEDOn(1);
+				//Need to turn sharp left
+			}
+		}
+		
+		
+		//Delay		
+		
+		if(control==0.0)
+		{
+			MotorA(MOTOR_CCW,255);
+			MotorB(MOTOR_CCW,255);
+			LEDOn(3);
+		}
