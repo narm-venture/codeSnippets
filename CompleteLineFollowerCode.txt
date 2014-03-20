@@ -1,0 +1,182 @@
+//Designed by Shubhojyoti Ganguly
+
+//Change the motor functions and uncomment wherever necessary
+
+//Made for the technophilia board
+
+
+#include<avr/io.h>
+#include<util/delay.h>
+
+#define MAX_SPEED 1023
+#define MIN_SPEED 0
+
+#define ROBOT_SPEED 200
+
+#define SENSOR_THRESH 800
+
+#define SCALE (MAX_SPEED/ROBOT_SPEED)
+
+float pGain = 200;	//Proportional Gain
+float iGain =  0.2;	//Integral Gain
+float dGain =  120;	//Differential Gain
+
+
+int32_t eInteg = 0;	//Integral accumulator
+int32_t ePrev  =0;		//Previous Error
+
+
+#define M_CW 1
+#define M_CCW 2
+#define M_STOP 0
+
+int ADCsingleREAD(uint8_t adctouse)
+{
+    int ADCval;
+
+    ADMUX = adctouse;         // use #1 ADC
+    ADMUX |= (1 << REFS0)|(1<<REFS1);    // use AVcc as the reference
+    ADMUX &= ~(1 << ADLAR);   // clear for 10 bit resolution
+    
+    ADCSRA |= (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0);    // 128 prescale for 8Mhz
+    ADCSRA |= (1 << ADEN);    // Enable the ADC
+
+    ADCSRA |= (1 << ADSC);    // Start the ADC conversion
+
+    while(ADCSRA & (1 << ADSC));      // Thanks T, this line waits for the ADC to finish 
+
+
+    ADCval = ADCL;
+    ADCval = (ADCH << 8) + ADCval;    // ADCH is read so ADC can be updated again
+
+    return ADCval;
+}
+int readSensors()
+{
+	int sensor1,sensor2,sensor3,sensor4,sensor5;
+	float avgSensor;
+	sensor1=ADCsingleREAD(5);
+	ADCSRA=0X00;
+	ADMUX=0x00;
+	ADCL=0;
+	sensor2=ADCsingleREAD(4);
+	ADCSRA=0X00;
+	ADMUX=0x00;
+	ADCL=0;
+	sensor3=ADCsingleREAD(3);
+	ADCSRA=0X00;
+	ADMUX=0x00;
+	ADCL=0;
+	sensor4=ADCsingleREAD(2);
+	ADCSRA=0X00;
+	ADMUX=0x00;
+	ADCL=0;
+	sensor5=ADCsingleREAD(1);
+	ADCSRA=0X00;
+	ADMUX=0x00;
+	ADCL=0;
+	if(sensor1>SENSOR_THRESH)
+	sensor1=1;
+	else
+	sensor1=0;
+	if(sensor2>SENSOR_THRESH)
+	sensor2=1;
+	else
+	sensor2=0;
+	if(sensor3>SENSOR_THRESH)
+	sensor3=1;
+	else
+	sensor3=0;
+	if(sensor4>SENSOR_THRESH)
+	sensor4=1;
+	else
+	sensor4=0;
+	if(sensor5>SENSOR_THRESH)
+	sensor5=1;
+	else
+	sensor5=0;
+	if(sensor1==0 && sensor2==0 && sensor3==0 && sensor4==0 && sensor5==0)
+	{
+		return 0xFF;
+	}		
+   
+	// Calculate weighted mean
+	avgSensor = (float) sensor1*1 + sensor2*2 + sensor3*3 + sensor4*4 + sensor5*5 ;
+	avgSensor = (float) avgSensor / (sensor1 + sensor2 + sensor3 + sensor4 + sensor5);
+
+	return avgSensor;
+	
+
+
+}
+float PID(float cur_value,float req_value)
+{
+  float pid;
+  float error;
+
+  error = req_value - cur_value;         
+  pid = (pGain * error)  + (iGain * eInteg) + (dGain * (error - ePrev)); 
+
+  eInteg += error;                  // integral is simply a summation over time
+  ePrev = error;                    // save previous for derivative
+
+  return pid;
+}
+
+void main()
+{
+	DDRB=0b00001111;	
+	float sensor,sprev,control;
+	while(1)
+	{
+		sensor=readSensors();
+		if(sensor==0xFF)
+		{sensor=sprev;}
+		
+		control=PID(sensor,3.0);
+		sprev=sensor;
+		
+		if(control > 510)
+			control = 510;
+		if(control < -510)
+			control = -510;
+
+		if(control>0.0)
+		{
+			if(control<255)
+			{
+				//MotorA(MOTOR_CCW,255);
+				//MotorB(MOTOR_CCW,255-control);
+				PORTB|=(1<<PB2);
+				//Needs to turn medium right 
+			}
+			else
+			{
+				//MotorA(MOTOR_CW,control-255);
+				//MotorB(MOTOR_STOP,0);
+				PORTB|=(1<<PB3);
+				//Need to turn sharp right
+			}
+		}
+		if(control<0.0)
+		{
+			if(control>-255)
+			{
+				//MotorB(MOTOR_CCW,255);
+				//MotorA(MOTOR_CCW,255+control);
+				PORTB|=(1<<PB1);
+				//Need to turn medium left
+			}
+			else
+			{
+				//MotorA(MOTOR_CW,-control-255);
+				//MotorB(MOTOR_STOP,0);
+				PORTB|=(1<<PB0);
+				//Need to turn sharp left
+			}
+		}
+		
+		
+		
+	}
+}
