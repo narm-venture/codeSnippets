@@ -5,7 +5,7 @@
 	ADVANCED LINE FOLLOWER WITH PID CONTROL
 */
 
-
+#define F_CPU 12000000UL
 
 #include<avr/io.h>
 #include<util/delay.h>
@@ -16,13 +16,13 @@
 #define ROBOT_SPEED 200
 
 #define SENSOR_THRESH 800
-#define DELAY 10
+#define DELAY 1
 
 #define SCALE (MAX_SPEED/ROBOT_SPEED)
 
-float pGain = 210;	//Proportional Gain
-float iGain =  0.2;	//Integral Gain
-float dGain =  100;	//Differential Gain
+float Kp = 100;	//Proportional Gain
+float Ki =  0.01;	//Integral Gain
+float Kd =  90;	//Differential Gain
 
 
 int32_t eInteg = 0;	//Integral accumulator
@@ -199,9 +199,9 @@ float PID(float cur_value,float req_value)
   float error;
 
   error = req_value - cur_value;         
-  pid = (pGain * error)  + (iGain * eInteg*DELAY) + (dGain * (error - ePrev)/DELAY); 
+  pid = (Kp * error)  + (Ki * eInteg) + (Kd * (error - ePrev)/DELAY); 
 
-  eInteg += error;                  // integral is simply a summation over time
+  eInteg += error*DELAY;            // integral is simply a summation over time
   ePrev = error;                    // save previous for derivative
 
   return pid;
@@ -212,10 +212,10 @@ float PID(float cur_value,float req_value)
 //Line Follower control
 void control(float control)
 {
-	if(control > ROBOT_SPEED)
-		control=ROBOT_SPEED;
-	if(control < -ROBOT_SPEED)
-		control=-ROBOT_SPEED;
+	if(control > 2*ROBOT_SPEED)
+		control=2*ROBOT_SPEED;
+	if(control < -2*ROBOT_SPEED)
+		control=-2*ROBOT_SPEED;
 	if(control>0.0)
 	{
 		if(control<ROBOT_SPEED)
@@ -228,8 +228,8 @@ void control(float control)
 	
 		else
 		{
-			MotorA(M_CW,control-ROBOT_SPEED);
-			MotorB(M_STOP,0);
+			MotorA(M_CCW,ROBOT_SPEED);
+			MotorB(M_CW,control-ROBOT_SPEED);
 				
 				//Need to turn sharp right
 		}
@@ -245,7 +245,7 @@ void control(float control)
 		else
 		{
 			MotorA(M_CW,-control-ROBOT_SPEED);
-			MotorB(M_STOP,0);
+			MotorB(M_CCW,ROBOT_SPEED);
 			
 			//Need to turn sharp left
 		}
@@ -263,7 +263,7 @@ void control(float control)
 //------------------------------------------------------------
 
 //Main function for line follower
-void main()
+int main()
 {
 	
 	//float s=0.0f,control=0.0f;
@@ -276,5 +276,5 @@ void main()
 	
 	}		
 		
-	
+	return -1;
 }
