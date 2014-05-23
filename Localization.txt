@@ -1,0 +1,20 @@
+Question 3: Localization
+Localization is a method used to estimate the position of a robot in a map. 
+Let us consider a 1-D world in black and white. The map of the world is an array of 10 cells where each cell is either black or white. Our 1-D world is cyclic in nature so after we move more than the 10th cell, we end up in the first cell again.
+
+Our robot has a sensor within itself to detect whether it is on a black cell or white cell. Our robot can move as many steps as it wants in the forward or backward direction.
+Our robot has got stuck somewhere in this black and white world and no one has any knowledge of its position. The engineer who designed it, develops a simple algorithm to locate the robot:
+i.	The engineer reads the sensor of the robot and understands which type of cell the robot might be on
+ii.	Then engineer commands the robot to move a certain steps ahead
+iii.	Go to step i
+By executing the cycle over and over again, the engineer can better understand where the robot is.
+WAP such that after every cycle, the user enters the sensor value of the robot and the number of steps to move forward and after the operation the program displays the probabilities of the robot being in a particular cell.
+Note: All probabilities in the distribution must add up to 1
+
+The map of the world is :
+map={‘black’,’white’,’white’,’white’,’black’,’black’,’black’,’white’,’black’,’black’}
+
+Sample Input:
+Enter sensor reading: black
+0.1667,0,0,0,0.1667,0.1667,0.1667,0,0.1667,0.1667
+Enter number of steps to move: 4

@@ -1,16 +1,26 @@
+##Monte-Carlo Localization (version 1.0)
+## created by : Shubhojyoti Ganguly
+## Company: NARM Robotics
+
+
+
 colors = [['red', 'green', 'green', 'red' , 'red'],
           ['red', 'red', 'green', 'red', 'red'],
           ['red', 'red', 'green', 'green', 'red'],
           ['red', 'red', 'red', 'red', 'red']]
 
+##colors=[['green','green','green'],
+##        ['green','red','red'],
+##        ['green','green','green']]
 measurements = ['green', 'green', 'green' ,'green', 'green']
-
+##measurements=['red','red']
 
 motions = [[0,0],[0,1],[1,0],[1,0],[0,1]]
+##motions=[[0,0],[0,1]]
 
-sensor_right = 1.0
+sensor_right = 0.8
 
-p_move = 0.8
+p_move = 0.7
 
 def show(p):
     for i in range(len(p)):
@@ -28,6 +38,7 @@ p = [[1,1,1,1,1],
      [1,1,1,1,1]]
 
 
+p_Under=p_Over=(1-p_move)/2.
 
 
 
@@ -50,13 +61,48 @@ def sense(p,Z):
                 q[i][x]/=tot
     return q
 
+def multiply_to_list(lis,c):
+    new_list=[]
+    for x in range(len(lis)):
+        new_list.append(float(lis[x]*c))
+    return new_list
+
+def add_lists(lisa,lisb):
+    if not len(lisa)==len(lisb):
+        return -1
+    for x in range(len(lisa)):
+        lisa[x]+=lisb[x]
+    return lisa
+
 def move(p,U):
     horizontal_steps=U[1]
     vertical_steps=U[0]
-    p=p[-vertical_steps:]+p[:-vertical_steps]
-    for x in range(len(p)):
-        tmp=p[x][-horizontal_steps:]+p[x][:-horizontal_steps]
-        p[x]=tmp
+    q=[]
+    row=[]
+    if not horizontal_steps==0:
+        for x in range(len(p)):
+            tmp=p[x]
+            for i in range(len(tmp)):
+                prob=p_move*tmp[(i-horizontal_steps)%len(tmp)]
+                prob+=p_Over*tmp[(i-horizontal_steps-1)%len(tmp)]
+                prob+=p_Under*tmp[(i-vertical_steps+1)%len(tmp)]
+                row.append(prob)
+            q.append(row)
+            row=[]
+
+        p=q
+        q=[]
+        row=[]
+    if not vertical_steps==0:            
+        for x in range(len(p)):
+            row=multiply_to_list(p[(x-vertical_steps)%len(p)],p_move)
+            row=add_lists(row,multiply_to_list(p[(x-vertical_steps-1)%len(p)],p_Over))
+            row=add_lists(row,multiply_to_list(p[(x-vertical_steps+1)%len(p)],p_Under))
+            q.append(row)
+            row=[]
+
+        p=q
+    
     return p
 
 
@@ -69,6 +115,7 @@ def move(p,U):
 for x in range(len(measurements)):
     p=move(p,motions[x])
     p=sense(p, measurements[x])
+    
 show(p)
 
 flat_p=[x for sublist in p for x in sublist]
@@ -76,7 +123,7 @@ index=flat_p.index(max(flat_p))
 print '------------------------------------------------------'
 print 'Localization complete'
 print '------------------------------------------------------'
-print 'Your robot is probably present at (',(index/5),',',(index%5),')'
+print 'The robot has ',flat_p[index]*100,'% chance of being present at (',(index/5),',',(index%5),')'
 
 
 
