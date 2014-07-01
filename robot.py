@@ -1,15 +1,8 @@
-# Make a robot called myrobot that starts at
-# coordinates 30, 50 heading north (pi/2).
-# Have your robot turn clockwise by pi/2, move
-# 15 m, and sense. Then have it turn clockwise
-# by pi/2 again, move 10 m, and sense again.
-#
-# Your program should print out the result of
-# your two sense measurements.
-#
-# Don't modify the code below. Please enter
-# your code at the bottom.
-
+#Particle Filter
+################################
+#Designed by : Shubhojyoti Ganguly and the NARM Team
+#Acknowledgement: Sebastian Thurman and the Udacity Team
+###########################
 from math import *
 import random
 
@@ -112,19 +105,28 @@ def eval(r, p):
 
 
 
-####   DON'T MODIFY ANYTHING ABOVE HERE! ENTER CODE BELOW ####
-##
-##myrobot = robot()
-##
-##myrobot.set(30.0,50.0,pi/2)
-##myrobot.set_noise(5.,.1,5.)
-##myrobot=myrobot.move(-pi/2,15.0)
-##print myrobot.sense()
-##myrobot=myrobot.move(-pi/2,10.)
-##print myrobot.sense()
+
+myrobot=robot()
+myrobot=myrobot.move(0.1,5.)
+Z=myrobot.sense()
+print Z
+print myrobot
 
 particles=[]
 for x in range(1000):
-    particles.append(robot())
+    x=robot()
+    x.set_noise(.05,.05,5.)
+    particles.append(x)
 
-print particles[input('Enter index:')]
+for x in range(1000):
+    particles[x]=particles[x].move(0.1,5)
+w=[]
+for x in range(1000):
+    w.append(particles[x].measurement_prob(Z))
+#print w[0]
+norm_w=[]
+total=sum(w)
+for x in range(1000):
+    norm_w.append(w[x]/total)
+    
+#print norm_w[0]

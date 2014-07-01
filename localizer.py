@@ -18,9 +18,9 @@ measurements = ['green', 'green', 'green' ,'green', 'green']
 motions = [[0,0],[0,1],[1,0],[1,0],[0,1]]
 ##motions=[[0,0],[0,1]]
 
-sensor_right = 0.8
+sensor_right = 0.9
 
-p_move = 0.7
+p_move = 0.8
 
 def show(p):
     for i in range(len(p)):
